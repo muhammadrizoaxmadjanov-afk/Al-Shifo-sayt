@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Al-Shifo — Alloh bergan ne'matlar va Qur'on oyatlari jamlanmasi</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #fdfaf3;
+    --card: #ffffff;
+    --primary: #14532d;
+    --gold: #d97706;
+    --text: #1c1917;
+    --muted: #57534e;
+    --shadow: 0 8px 24px rgba(20, 83, 45, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    padding-bottom: 86px;
+  }
+
+  /* Splash Screen */
+  #splash {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(160deg, #064e3b 0%, #14532d 55%, #1c1917 100%);
+    color: #fff;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 28px;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+  #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .splash-emblem {
+    width: 112px;
+    height: 112px;
+    border-radius: 30px;
+    background: radial-gradient(circle at 30% 30%, #fde68a, #d97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 54px;
+    border: 3px solid #fef3c7;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+    margin-bottom: 20px;
+  }
+  .splash-title {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fde68a;
+    margin-bottom: 10px;
+  }
+  .splash-motto {
+    font-size: 16px;
+    font-style: italic;
+    color: #fef3c7;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 18px;
+    border-radius: 99px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    margin-bottom: 14px;
+  }
+  .splash-sub {
+    font-size: 15.5px;
+    color: #d1fae5;
+    max-width: 320px;
+    margin-bottom: 30px;
+  }
+  .splash-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    padding: 15px 38px;
+    font-size: 17px;
+    font-weight: 700;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(217, 119, 6, 0.45);
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #14532d 0%, #064e3b 100%);
+    color: #fff;
+    padding: 18px 16px 20px;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: 0 6px 20px rgba(6, 78, 59, 0.18);
+    text-align: center;
+  }
+  header h1 {
+    font-size: 25px;
+    font-weight: 800;
+    color: #fde68a;
+    margin-bottom: 4px;
+  }
+  .header-motto {
+    font-size: 13.5px;
+    font-style: italic;
+    color: #fef3c7;
+    margin-bottom: 4px;
+  }
+  .header-desc {
+    font-size: 12.5px;
+    color: #a7f3d0;
+  }
+
+  .container { max-width: 540px; margin: 0 auto; padding: 16px; }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  .section-heading {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 14px;
+  }
+
+  /* Product Cards */
+  .product-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+    border: 1px solid #f3e8d2;
+  }
+  .ruqiya-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #ecfdf5;
+    color: #065f46;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 99px;
+    border: 1px solid #a7f3d0;
+    margin-bottom: 10px;
+  }
+  .product-title {
+    font-size: 18.5px;
+    font-weight: 800;
+    color: #1c1917;
+    margin-bottom: 6px;
+  }
+  .product-comp {
+    font-size: 13.8px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fffbeb;
+    padding: 10px 14px;
+    border-radius: 13px;
+    border: 1px solid #fde68a;
+    margin-bottom: 12px;
+  }
+  .weight-tag { font-size: 13.5px; font-weight: 700; color: #92400e; }
+  .price-tag { font-size: 16.5px; font-weight: 800; color: #b45309; }
+
+  .benefits-toggle {
+    width: 100%;
+    background: #f5f5f4;
+    color: #292524;
+    border: 1px solid #e7e5e4;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .benefits-box {
+    display: none;
+    background: #fafaf9;
+    border-radius: 14px;
+    padding: 13px;
+    margin-bottom: 12px;
+    border: 1px solid #e7e5e4;
+    font-size: 13.5px;
+  }
+  .benefits-box.open { display: block; }
+  .benefit-group { margin-bottom: 10px; }
+  .benefit-group:last-child { margin-bottom: 0; }
+  .benefit-group h4 { font-size: 13.5px; color: var(--primary); margin-bottom: 4px; font-weight: 800; }
+  .benefit-group ul { padding-left: 18px; color: #44403c; }
+  .benefit-group li { margin-bottom: 4px; }
+
+  .order-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #15803d, #14532d);
+    color: #fff;
+    border: none;
+    padding: 13px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(20, 83, 45, 0.25);
+  }
+
+  /* Reviews */
+  .review-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--gold);
+  }
+  .review-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .review-author { font-weight: 700; font-size: 14px; color: var(--primary); }
+  .review-stars { color: #f59e0b; font-size: 13px; }
+  .review-text { font-size: 14px; color: #292524; font-style: italic; }
+  .channel-cta {
+    display: block;
+    text-align: center;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: #fff;
+    text-decoration: none;
+    padding: 15px 18px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 15px;
+    margin-top: 18px;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.28);
+  }
+
+  /* Advice */
+  .advice-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid #e7e5e4;
+  }
+  .advice-tag {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: #fef3c7;
+    color: #92400e;
+    margin-bottom: 8px;
+  }
+  .advice-title { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+  .advice-body { font-size: 13.8px; color: #44403c; }
+
+  /* 4th Section: Shifo Oyatlari */
+  .ayah-card {
+    background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+    border: 1px solid #fde68a;
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .ayah-source { font-size: 12.5px; font-weight: 800; color: #b45309; margin-bottom: 8px; }
+  .ayah-arabic {
+    font-size: 20px;
+    text-align: right;
+    direction: rtl;
+    color: #14532d;
+    font-weight: 700;
+    line-height: 1.8;
+    margin-bottom: 10px;
+  }
+  .ayah-uz { font-size: 13.8px; color: #292524; }
+
+  /* Bottom Nav */
+  nav.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 1px solid #e7e5e4;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 8px 4px 10px;
+    z-index: 900;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+  }
+  .nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #78716c;
+    cursor: pointer;
+  }
+  .nav-item .icon { font-size: 20px; }
+  .nav-item.active { color: var(--primary); }
+
+  /* Order Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-sheet {
+    background: #fff;
+    width: 100%;
+    max-width: 540px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 22px 18px 28px;
+  }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .modal-title { font-size: 18px; font-weight: 800; color: var(--primary); }
+  .close-modal { background: #f5f5f4; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+  .qty-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fafaf9;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #e7e5e4;
+    margin-bottom: 12px;
+  }
+  .qty-controls { display: flex; align-items: center; gap: 14px; }
+  .qty-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid #d6d3d1; background: #fff;
+    font-size: 20px; font-weight: 700; cursor: pointer;
+  }
+  .qty-val { font-size: 18px; font-weight: 800; min-width: 24px; text-align: center; }
+  .input-field {
+    width: 100%; padding: 12px 14px; border-radius: 12px;
+    border: 1px solid #d6d3d1; font-size: 14.5px; margin-bottom: 10px;
+  }
+  .tg-send-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: #fff; border: none; padding: 15px; border-radius: 14px;
+    font-size: 15.5px; font-weight: 700; cursor: pointer; margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- KIRISH EKRANI -->
+<div id="splash">
+  <div class="splash-emblem">🍯</div>
+  <div class="splash-title">Al-Shifo</div>
+  <div class="splash-motto">Ixlos qilmasangiz o'zingizni charchatmang!</div>
+  <div class="splash-sub">Alloh bergan ne'matlar va Qur'on oyatlari jamlanmasi</div>
+  <button class="splash-btn" onclick="enterApp()">Ilovaga kirish</button>
+</div>
+
+<!-- HEADER -->
+<header>
+  <h1>🍯 Al-Shifo</h1>
+  <div class="header-motto">Ixlos qilmasangiz o'zingizni charchatmang!</div>
+  <div class="header-desc">Alloh bergan ne'matlar va Qur'on oyatlari jamlanmasi</div>
+</header>
+
+<div class="container">
+
+  <!-- 1-BO'LIM: MAHSULOTLAR -->
+  <section id="sec-products" class="tab-section active">
+    <div class="section-heading">🍯 Mahsulotlarimiz</div>
+
+    <!-- 1. Al-Shifo Aralashmasi -->
+    <div class="product-card">
+      <div class="ruqiya-badge">📖 Qur'on oyatlari bilan Ruqiya o'qilgan</div>
+      <div class="product-title">Al-Shifo Aralashmasi</div>
+      <div class="product-comp">Qora sedana, tog' asali hamda zaytun yog'i aralashtirilib, ruqiya o'qilgan shifobaxsh aralashma.</div>
+      <div class="price-row">
+        <span class="weight-tag">⚖️ 300 g</span>
+        <span class="price-tag">Narxi atigi 100 000 so'm</span>
+      </div>
+      <button class="benefits-toggle" onclick="toggleBenefits('ben-1', this)">
+        <span>✨ Diniy va ilmiy foydalari</span>
+        <span>▼</span>
+      </button>
+      <div id="ben-1" class="benefits-box">
+        <div class="benefit-group">
+          <h4>🕌 Qur'on va Hadisdagi foydalari:</h4>
+          <ul>
+            <li><strong>Asal:</strong> Qur'oni Karimning Nahl surasi 69-oyatida asalda odamlar uchun shifo borligi bayon etilgan.</li>
+            <li><strong>Qora sedana:</strong> Payg'ambarimiz (s.a.v.): <em>«Qora sedanani lozim tutinglar, unda o'limdan boshqa barcha dardga shifo bor»</em> deb marhamat qilganlar (Imom Buxoriy va Muslim rivoyati).</li>
+            <li><strong>Zaytun:</strong> Qur'oni Karimda «muborak daraxt» sifatida zikr qilingan.</li>
+          </ul>
+        </div>
+        <div class="benefit-group">
+          <h4>🔬 Zamonaviy ilmiy foydalari:</h4>
+          <ul>
+            <li>Qora sedana tarkibidagi <strong>timoxinon</strong> moddasi immun tizimini mustahkamlash va hujayralarni himoya qilish xususiyatiga ega.</li>
+            <li>Tog' asali antioksidantlar, tabiiy fermentlar va minerallarga boy bo'lib, organizmga quvvat bag'ishlaydi.</li>
+            <li>Zaytun yog'i tarkibidagi foydali yog' kislotalari (Omega-9) yurak-qon tomir va hazm tizimini qo'llab-quvvatlaydi.</li>
+          </ul>
+        </div>
+      </div>
+      <button class="order-btn" onclick="openOrder('Al-Shifo Aralashmasi (300 g)', 100000, '100 000 so'm')">
+        🛒 Buyurtma berish
+      </button>
+    </div>
+
+    <!-- 2. Oq kunjut va tog' asali aralashmasi -->
+    <div class="product-card">
+      <div class="ruqiya-badge">📖 Qur'on oyatlari bilan Ruqiya qilingan</div>
+      <div class="product-title">Al-Shifo Tabiiy Kalsiy (Oq kunjut va tog' asali)</div>
+      <div class="product-comp">Tabiiy oq kunjut hamda tog' asali aralashmasi, ruqiya qilingan.</div>
+      <div class="price-row">
+        <span class="weight-tag">⚖️ 300 g</span>
+        <span class="price-tag">70 000 so'm</span>
+      </div>
+      <button class="benefits-toggle" onclick="toggleBenefits('ben-2', this)">
+        <span>✨ Diniy va ilmiy foydalari</span>
+        <span>▼</span>
+      </button>
+      <div id="ben-2" class="benefits-box">
+        <div class="benefit-group">
+          <h4>🕌 Sharq tabobati va an'anaviy bilimlar:</h4>
+          <ul>
+            <li>Ibn Sino «Tib qonunlari» asarida kunjutni tana quvvatini oshiruvchi, asablarni tinchlantiruvchi va suyak-bo'g'imlarni mustahkamlovchi ne'mat sifatida ta'riflagan.</li>
+            <li>Tog' asali bilan birikkanida tarkibidagi minerallarning organizmga singishi yanada yaxshilanadi.</li>
+          </ul>
+        </div>
+        <div class="benefit-group">
+          <h4>🔬 Zamonaviy ilmiy foydalari:</h4>
+          <ul>
+            <li>Oq kunjut tabiiy <strong>kalsiy</strong> manbai bo'lib, suyaklar, tishlar, tirnoqlar va sochlar mustahkamligini saqlashda muhim o'rin tutadi.</li>
+            <li>Tarkibida magniy, fosfor, rux (sink) va E vitamini mavjud bo'lib, bolalar o'sishi va kattalarda suyak mo'rtlashishining oldini olishga yordam beradi.</li>
+          </ul>
+        </div>
+      </div>
+      <button class="order-btn" onclick="openOrder('Oq kunjut va tog' asali aralashmasi (300 g)', 70000, '70 000 so'm')">
+        🛒 Buyurtma berish
+      </button>
+    </div>
+
+    <!-- 3. Zaytun yog'i -->
+    <div class="product-card">
+      <div class="ruqiya-badge">📖 Qur'on oyatlari bilan Ruqiya qilingan</div>
+      <div class="product-title">Zaytun Yog'i (Ruqiya o'qilgan)</div>
+      <div class="product-comp">Tabiiy toza zaytun yog'i, Qur'on oyatlari o'qilgan.</div>
+      <div class="price-row">
+        <span class="weight-tag">🌿 Tabiiy mahsulot</span>
+        <span class="price-tag">Kelishilgan narxda</span>
+      </div>
+      <button class="benefits-toggle" onclick="toggleBenefits('ben-3', this)">
+        <span>✨ Foydalari va qo'llash usullari</span>
+        <span>▼</span>
+      </button>
+      <div id="ben-3" class="benefits-box">
+        <div class="benefit-group">
+          <h4>🕌 Shar'iy foydalari:</h4>
+          <ul>
+            <li>Payg'ambarimiz (s.a.v.): <em>«Zaytun yog'ini yenglar va uni badaningizga surtinglar, chunki u muborak daraxtdandir»</em> deb tavsiya qilganlar (Imom Termiziy rivoyati).</li>
+            <li>Ruqiya oyatlari o'qilgan zaytun yog'i ham tanaga, ham ruhiy xotirjamlikka sabab bo'ladi.</li>
+          </ul>
+        </div>
+        <div class="benefit-group">
+          <h4>🔬 Ilmiy foydalari:</h4>
+          <ul>
+            <li>Polifenollar va E vitaminiga boy bo'lib, terini yoshartiradi, qurish va yallig'lanishni kamaytiradi.</li>
+            <li>Yurak-qon tomir va oshqozon-ichak tizimi faoliyatini qo'llab-quvvatlaydi.</li>
+          </ul>
+        </div>
+        <div class="benefit-group">
+          <h4>🧴 Qanday qo'llash kerak:</h4>
+          <ul>
+            <li><strong>Bosh va sochlarga:</strong> Soch ildizlarini mustahkamlash va bosh terisini oziqlantirish uchun boshga yengil uqalab surtiladi.</li>
+            <li><strong>Badan va teriga:</strong> Dushdan keyin yoki uyqu oldidan quruq teriga, yuz va qo'llarga namlantiruvchi vosita sifatida surtiladi.</li>
+            <li><strong>Bo'g'im va bel sohasiga:</strong> Og'riq yoki charchoq sezilgan joylarga iliq holatda yengil massaj qilib surtiladi.</li>
+            <li><strong>Taomlarga:</strong> Tayyor salatlar va taomlarga qo'shib iste'mol qilinadi.</li>
+          </ul>
+        </div>
+      </div>
+      <button class="order-btn" onclick="openOrder('Ruqiya qilingan Zaytun yog'i', 0, 'Kelishilgan narxda')">
+        🛒 Buyurtma berish
+      </button>
+    </div>
+  </section>
+
+  <!-- 2-BO'LIM: OTZIVLAR -->
+  <section id="sec-reviews" class="tab-section">
+    <div class="section-heading">💬 Mijozlarimiz Fikrlari (Otzivlar)</div>
+
+    <div class="review-card">
+      <div class="review-header">
+        <span class="review-author">🍯 Al-Shifo mijozi (@Shifo_otziv)</span>
+        <span class="review-stars">⭐⭐⭐⭐⭐</span>
+      </div>
+      <div class="review-text">«Assalomu alaykum! Al-Shifo aralashmasini oldik, mazasi ham, sifati ham juda zo'r ekan. Oilamiz bilan ixlos qilib boshladik, Alloh rozi bo'lsin, baraka topsinlar!»</div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-header">
+        <span class="review-author">🍯 Al-Shifo mijozi (@Shifo_otziv)</span>
+        <span class="review-stars">⭐⭐⭐⭐⭐</span>
+      </div>
+      <div class="review-text">«Oq kunjutli tabiiy kalsiy aralashmasini farzandlarim uchun buyurtma qilgandim. Bolalarim juda yaxshi ko'rib yeyishyapti, tabiiy va toza mahsulot ekani sezilib turibdi.»</div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-header">
+        <span class="review-author">🍯 Al-Shifo mijozi (@Shifo_otziv)</span>
+        <span class="review-stars">⭐⭐⭐⭐⭐</span>
+      </div>
+      <div class="review-text">«Ruqiya o'qilgan zaytun yog'i va aralashmani oldim. Qadoqlanishi ham chiroyli, o'z vaqtida yetkazib berishdi. Ixlos bilan foydalanyapmiz, rahmat katta!»</div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-header">
+        <span class="review-author">🍯 Al-Shifo mijozi (@Shifo_otziv)</span>
+        <span class="review-stars">⭐⭐⭐⭐⭐</span>
+      </div>
+      <div class="review-text">«Avval o'zimizga olgandik, natijasini ko'rib ota-onamizga ham yana buyurtma berdik. Haqiqiy halol va ishonchli mahsulotlar ekan.»</div>
+    </div>
+
+    <a href="https://t.me/Shifo_otziv" target="_blank" class="channel-cta" onclick="openTgLink('https://t.me/Shifo_otziv')">
+      ✈️ Qolgan barcha otzivlarni ko'rish uchun Telegram kanalimizga o'ting (@Shifo_otziv) →
+    </a>
+  </section>
+
+  <!-- 3-BO'LIM: SOG'LIQ BO'YICHA MASLAHATLAR -->
+  <section id="sec-advice" class="tab-section">
+    <div class="section-heading">🌿 Sog'liq Bo'yicha Maslahatlar</div>
+
+    <div class="advice-card">
+      <span class="advice-tag">🕌 Tibbi Nabaviy</span>
+      <div class="advice-title">Ovqatlanishda me'yor va baraka</div>
+      <div class="advice-body">Payg'ambarimiz (s.a.v.) oshqozonni uch qismga bo'lishni tavsiya etganlar: bir qismi taom, bir qismi suv va bir qismi nafas olish uchun. Bu qoida hazm tizimini ortiqcha yuklamaslikning eng mukammal tibbiy asosidir.</div>
+    </div>
+
+    <div class="advice-card">
+      <span class="advice-tag">📜 Ibn Sino — Tib Qonunlari</span>
+      <div class="advice-title">Tabiiy ne'matlar va quvvat muvozanati</div>
+      <div class="advice-body">Abu Ali ibn Sino «Tib qonunlari» asarida shunday yozadi: <em>«Ovqatingiz dori bo'lsin, aks holda doringiz ovqatga aylanadi»</em>. Sun'iy shakar o'rniga tabiiy tog' asali va foydali o'simlik yog'laridan foydalanish tanadagi quvvatni tabiiy tiklaydi.</div>
+    </div>
+
+    <div class="advice-card">
+      <span class="advice-tag">💧 Sunnat va Zamonaviy Tibbiyot</span>
+      <div class="advice-title">Suv ichish odobi</div>
+      <div class="advice-body">Suvni o'tirgan holda, shoshilmasdan uch bo'lib ichish sunnatdir. Zamonaviy tibbiyot ham birdaniga ko'p suv ichish yurak va buyrakka bosim berishini, sekin ichish esa hujayralarni yaxshi to'yintirishini tasdiqlaydi.</div>
+    </div>
+
+    <div class="advice-card">
+      <span class="advice-tag">🌙 Uyqu va Dam olish</span>
+      <div class="advice-title">O'ng yonboshlab uxlash hikmati</div>
+      <div class="advice-body">Kechasi o'ng yonboshlab uxlash yurakning chap tomonda erkin ishlashini ta'minlaydi, oshqozondagi taomning oson hazm bo'lishiga va nafas yo'llarining ochiq turishiga yordam beradi.</div>
+    </div>
+
+    <div class="advice-card">
+      <span class="advice-tag">🤲 Ixlos va Ruhiy Xotirjamlik</span>
+      <div class="advice-title">Shifo Allohdandir</div>
+      <div class="advice-body">Har bir tabiiy ne'mat — sababdir. Haqiqiy shifo esa Alloh taoloning izni va insonning pok niyati, ixlosi hamda Qur'on oyatlarining barakasi bilan hosil bo'ladi.</div>
+    </div>
+  </section>
+
+  <!-- 4-BO'LIM: QUR'ONDAGI SHIFO OYATLARI -->
+  <section id="sec-ayat" class="tab-section">
+    <div class="section-heading">📖 Qur'ondagi Shifo Oyatlari</div>
+
+    <div class="ayah-card">
+      <div class="ayah-source">1. Tavba surasi, 14-oyat</div>
+      <div class="ayah-arabic">وَيَشْفِ صُدُورَ قَوْمٍ مُّؤْمِنِينَ</div>
+      <div class="ayah-uz"><strong>Ma'nosi:</strong> «Va mo'min qavmlarning ko'ngillariga shifo berur».</div>
+    </div>
+
+    <div class="ayah-card">
+      <div class="ayah-source">2. Yunus surasi, 57-oyat</div>
+      <div class="ayah-arabic">وَشِفَاءٌ لِّمَا فِي الصُّدُورِ وَهُدًى وَرَحْمَةٌ لِّلْمُؤْمِنِينَ</div>
+      <div class="ayah-uz"><strong>Ma'nosi:</strong> «Va ko'ksilardagi narsalarga (qalb kasalliklariga) shifo hamda mo'minlar uchun hidoyat va rahmatdir».</div>
+    </div>
+
+    <div class="ayah-card">
+      <div class="ayah-source">3. Nahl surasi, 69-oyat</div>
+      <div class="ayah-arabic">يَخْرُجُ مِن بُطُونِهَا شَرَابٌ مُّخْتَلِفٌ أَلْوَانُهُ فِيهِ شِفَاءٌ لِّلنَّاسِ</div>
+      <div class="ayah-uz"><strong>Ma'nosi:</strong> «Ularning (asalarilarning) qorinlaridan turli rangdagi ichimlik (asal) chiqurki, unda odamlar uchun shifo bordir».</div>
+    </div>
+
+    <div class="ayah-card">
+      <div class="ayah-source">4. Isro surasi, 82-oyat</div>
+      <div class="ayah-arabic">وَنُنَزِّلُ مِنَ الْقُرْآنِ مَا هُوَ شِفَاءٌ وَرَحْمَةٌ لِّلْمُؤْمِنِينَ</div>
+      <div class="ayah-uz"><strong>Ma'nosi:</strong> «Biz Qur'ondan mo'minlar uchun shifo va rahmat bo'ladigan oyatlarni nozil qilurmiz».</div>
+    </div>
+
+    <div class="ayah-card">
+      <div class="ayah-source">5. Shuaro surasi, 80-oyat</div>
+      <div class="ayah-arabic">وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ</div>
+      <div class="ayah-uz"><strong>Ma'nosi:</strong> «Bemor bo'lgan vaqtimda ham Uning O'zi menga shifo berur».</div>
+    </div>
+
+    <div class="ayah-card">
+      <div class="ayah-source">6. Fussilat surasi, 44-oyat</div>
+      <div class="ayah-arabic">قُلْ هُوَ لِلَّذِينَ آمَنُوا هُدًى وَشِفَاءٌ</div>
+      <div class="ayah-uz"><strong>Ma'nosi:</strong> «Ayting: U (Qur'on) imon keltirgan zotlar uchun hidoyat va shifodir».</div>
+    </div>
+  </section>
+
+</div>
+
+<!-- PASTKI 4 TA BO'LIM MENYUSI -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchTab('sec-products', this)">
+    <span class="icon">🍯</span>
+    <span>Mahsulotlar</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('sec-reviews', this)">
+    <span class="icon">💬</span>
+    <span>Otzivlar</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('sec-advice', this)">
+    <span class="icon">🌿</span>
+    <span>Maslahatlar</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('sec-ayat', this)">
+    <span class="icon">📖</span>
+    <span>Shifo Oyatlari</span>
+  </button>
+</nav>
+
+<!-- BUYURTMA OYNASI -->
+<div id="orderModal" class="modal-backdrop" onclick="if(event.target===this) closeOrder()">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <div class="modal-title" id="mProdName">Buyurtma berish</div>
+      <button class="close-modal" onclick="closeOrder()">✕</button>
+    </div>
+
+    <div class="qty-box">
+      <span style="font-weight:700; font-size:14.5px;">Miqdorni tanlang:</span>
+      <div class="qty-controls">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-val" id="mQty">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+    </div>
+
+    <div style="background:#fffbeb; padding:10px 14px; border-radius:12px; margin-bottom:12px; font-weight:800; color:#b45309; display:flex; justify-content:space-between;">
+      <span>Jami summa:</span>
+      <span id="mTotalText">100 000 so'm</span>
+    </div>
+
+    <input type="text" id="mCustomerName" class="input-field" placeholder="Ismingiz (ixtiyoriy)">
+    <input type="tel" id="mCustomerPhone" class="input-field" placeholder="Telefon raqamingiz (ixtiyoriy)">
+
+    <button class="tg-send-btn" onclick="sendToTelegram()">
+      ✈️ Telegram (@Muhiyfa_bot) orqali buyurtma berish
+    </button>
+  </div>
+</div>
+
+<script>
+  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  function enterApp() {
+    document.getElementById('splash').classList.add('hidden');
+  }
+
+  function switchTab(sectionId, btn) {
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleBenefits(id, btn) {
+    const box = document.getElementById(id);
+    const isOpen = box.classList.toggle('open');
+    btn.querySelector('span:last-child').textContent = isOpen ? '▲' : '▼';
+  }
+
+  let currentProduct = '';
+  let currentUnitPrice = 0;
+  let currentPriceLabel = '';
+  let currentQty = 1;
+
+  function formatSum(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
+  }
+
+  function openOrder(name, unitPrice, priceLabel) {
+    currentProduct = name;
+    currentUnitPrice = unitPrice;
+    currentPriceLabel = priceLabel;
+    currentQty = 1;
+    document.getElementById('mProdName').textContent = name;
+    document.getElementById('mQty').textContent = '1';
+    updateTotal();
+    document.getElementById('orderModal').classList.add('open');
+  }
+
+  function closeOrder() {
+    document.getElementById('orderModal').classList.remove('open');
+  }
+
+  function changeQty(delta) {
+    currentQty = Math.max(1, currentQty + delta);
+    document.getElementById('mQty').textContent = currentQty;
+    updateTotal();
+  }
+
+  function updateTotal() {
+    const totalEl = document.getElementById('mTotalText');
+    totalEl.textContent = currentUnitPrice > 0 ? formatSum(currentUnitPrice * currentQty) : currentPriceLabel;
+  }
+
+  function openTgLink(url) {
+    if (tg && tg.openTelegramLink) {
+      tg.openTelegramLink(url);
+    } else {
+      window.open(url, '_blank');
+    }
+  }
+
+  function sendToTelegram() {
+    const cname = document.getElementById('mCustomerName').value.trim();
+    const cphone = document.getElementById('mCustomerPhone').value.trim();
+    const totalStr = currentUnitPrice > 0 ? formatSum(currentUnitPrice * currentQty) : currentPriceLabel;
+
+    let msg = "Assalomu alaykum! Al-Shifo mahsulotiga buyurtma bermoqchiman:\n\n";
+    msg += "🍯 Mahsulot: " + currentProduct + "\n";
+    msg += "📦 Miqdori: " + currentQty + " dona\n";
+    msg += "💰 Narxi: " + totalStr;
+    if (cname) msg += "\n👤 Ism: " + cname;
+    if (cphone) msg += "\n📞 Tel: " + cphone;
+
+    const url = "https://t.me/Muhiyfa_bot?text=" + encodeURIComponent(msg);
+    openTgLink(url);
+    closeOrder();
+  }
+</script>
+</body>
+</html>
